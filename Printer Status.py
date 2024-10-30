@@ -15,7 +15,7 @@ from googleapiclient.errors import HttpError
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-WRITE_QUOTA_PER_MINUTE = 24
+WRITE_QUOTA_PER_MINUTE = 50
 
 DISCOVERY_RETRY_THRESHOLD = 3
 
