@@ -1,0 +1,10 @@
+[Unit]
+
+Description=printer status for prusa
+
+[Service]
+ExecStart=pwd
+Restart=always
+
+[Install]
+WantedBy = multi-user.target
