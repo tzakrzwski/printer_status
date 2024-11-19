@@ -3,7 +3,7 @@
 Description=printer status for prusa
 
 [Service]
-ExecStart= python3 /home/pi/prusa_status
+ExecStart= python3 "/home/pi/prusa_status/Printer Status.py"
 
 Restart=always
 StandardOutput=append:/home/pi/prusa_status.log
