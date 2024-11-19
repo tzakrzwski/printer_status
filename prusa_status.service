@@ -3,8 +3,11 @@
 Description=printer status for prusa
 
 [Service]
-ExecStart=pwd
+ExecStart= python3 /home/pi/prusa_status
+
 Restart=always
+StandardOutput=append:/home/pi/prusa_status.log
+StandardError=inherit
 
 [Install]
 WantedBy = multi-user.target
