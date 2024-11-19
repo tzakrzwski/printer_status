@@ -49,6 +49,7 @@ OFFLINE_STATUS_FORMAT = [
     "name",
     "serial",
     "address",
+    "api-key",
     "*", #Format last_update in pretty format
     "~", #Format State as 'Offline'
     "",
