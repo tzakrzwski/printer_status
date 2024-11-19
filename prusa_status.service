@@ -7,7 +7,7 @@ WorkingDirectory= /home/pi/printer_status
 ExecStart= python3 "Printer Status.py"
 
 Restart=always
-StandardOutput=append:/home/pi/prusa_status.log
+StandardOutput=file:/home/pi/prusa_status.log
 StandardError=inherit
 
 [Install]
