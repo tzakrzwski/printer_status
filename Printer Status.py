@@ -101,6 +101,11 @@ class Printer():
         self.job_display_name = ""
         self.offline = True
 
+        try:
+            self.ip_range_index = printer_info['ip_range_index']
+        except:
+            self.ip_range_index = -1
+
         self.discover_retry_count = 0 #Number of failed get_status() before try to find address again
         self.rediscover_address_thread = threading.Thread(target=self.discover_address, daemon=True)
 
@@ -121,7 +126,13 @@ class Printer():
 
     def discover_address(self):
         headers = {'X-Api-Key': self.api_key}
-        ip = ip_range_start[:]
+
+        if self.ip_range_index == -1:
+            ip = ip_range_start[0][:]
+            ip_end = ip_range_end[0][:]
+        else:
+            ip = ip_range_start[self.ip_range_index][:]
+            ip_end = ip_range_end[self.ip_range_index][:]
 
         while True:
 
@@ -146,7 +157,7 @@ class Printer():
                 pass
                 #print(f"{address}: {error}")
 
-            if address == convert_address(ip_range_end) or address == "255.255.255.255":
+            if address == convert_address(ip_end) or address == "255.255.255.255":
                 return False
 
             ip[3] = ip[3] + 1
@@ -282,17 +293,20 @@ service = build("sheets", "v4", credentials=creds)
 
 
 Printer_List = []
+ip_range_start = []
+ip_range_end = []
 i = 0
 
 with open("config.json") as f:
     config_options = json.loads(f.read())
     sheet_range = config_options["range"]
     update_interval = float(config_options["update_interval"])
-    ip_range_start = [int(x) for x in config_options["ip_start"].split('.')]
-    ip_range_end = [int(x) for x in config_options["ip_end"].split('.')]
     add_header = config_options["add_header"]
     range_i = int(re.findall(r'^[^\d]*(\d+)',sheet_range)[0])
-    pass
+
+    for ipr in config_options["ip_range"]:
+        ip_range_start.append([int(x) for x in ipr["start"].split('.')])
+        ip_range_end.append([int(x) for x in ipr["end"].split('.')])
 
 header_range = re.sub(r'(?<=^[A-Z])\d+',str(range_i),sheet_range)
 range_i = range_i+1
