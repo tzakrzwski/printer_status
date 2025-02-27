@@ -1,6 +1,7 @@
 import json, time, re
 import os.path
 import concurrent.futures
+import subprocess
 import requests
 import threading
 from requests.exceptions import Timeout, ConnectionError, HTTPError
@@ -245,6 +246,10 @@ class Printer():
 
 
     def post_status(self):
+        # Don't update the status if you are offline UNLESS you are offline for a while
+        if self.offline and time.time() - self.last_update > update_interval*3:
+            return -1
+        
         self.last_update = time.time()
         values = self.format_status()
         body = {"values": [values]}
@@ -303,6 +308,12 @@ with open("config.json") as f:
     update_interval = float(config_options["update_interval"])
     add_header = config_options["add_header"]
     range_i = int(re.findall(r'^[^\d]*(\d+)',sheet_range)[0])
+    try:
+        reset_adapter_hack = config_options["reset_adapter"]
+        ethernet_adapter = config_options["ethernet_adapter"]
+    except:
+        reset_adapter_hack = 0
+        ethernet_adapter = ""
 
     for ipr in config_options["ip_range"]:
         ip_range_start.append([int(x) for x in ipr["start"].split('.')])
@@ -332,6 +343,16 @@ if add_header == "true":
 print("Start Main Loop")
 
 while True:
+    # Added hack for if all printers are offline
+    reset_connection = 1
+
     for p in Printer_List:
         p.main()
+        if not p.offline:
+            reset_connection = 0
+
+    # Check if no printers are connected; Then reset connection
+    if reset_adapter_hack and reset_connection:
+        subprocess.Popen("sudo ip link set "+ethernet_adapter+" down && sudo ip link set "+ethernet_adapter+" up", shell=True)
+        time.sleep(2)
             

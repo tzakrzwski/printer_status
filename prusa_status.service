@@ -4,7 +4,7 @@ Description=printer status for prusa
 
 [Service]
 WorkingDirectory= /home/pi/printer_status
-ExecStart= python3 "Printer Status.py"
+ExecStart= /home/pi/printer_status/venv/bin/python "Printer Status.py"
 
 Restart=always
 StandardOutput=file:/home/pi/prusa_status.log
