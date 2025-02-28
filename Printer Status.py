@@ -247,7 +247,7 @@ class Printer():
 
     def post_status(self):
         # Don't update the status if you are offline UNLESS you are offline for a while
-        if self.offline and time.time() - self.last_update > update_interval*3:
+        if self.offline and  time.time() - self.last_update < update_interval*3:
             return -1
         
         self.last_update = time.time()

@@ -9,6 +9,9 @@ __pycache__/
 # Config Files
 *.json
 
+# Service Files
+*.service
+
 # Distribution / packaging
 .Python
 build/
