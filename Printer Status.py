@@ -5,7 +5,6 @@ import subprocess
 import requests
 import threading
 from requests.exceptions import Timeout, ConnectionError, HTTPError
-from json.decoder import JSONDecodeError
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -16,7 +15,7 @@ from googleapiclient.errors import HttpError
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-WRITE_QUOTA_PER_MINUTE = 50
+WRITE_QUOTA_PER_MINUTE = 60
 
 DISCOVERY_RETRY_THRESHOLD = 3
 
@@ -24,7 +23,7 @@ STATUS_FORMAT = [
     "name",
     "serial",
     "address",
-    "api_key",
+    "",
     "*", #Format last_update in pretty format
     "state",
     "job_display_name",
@@ -37,7 +36,7 @@ STATUS_FORMAT_HEADERS = [
     "Printer Name",
     "Printer Serial Number",
     "IP Address",
-    "Password",
+    "",
     "Last Update",
     "Printer State",
     "Print Name",
@@ -50,7 +49,7 @@ OFFLINE_STATUS_FORMAT = [
     "name",
     "serial",
     "address",
-    "api_key",
+    "",
     "*", #Format last_update in pretty format
     "~", #Format State as 'Offline'
     "",
@@ -199,12 +198,13 @@ class Printer():
 
 
             else:
-                print(self.name+": Prusa Request Bad Result Code: "+str(r.status_code))
+                pass
+                #print(self.name+": Prusa Request Bad Result Code: "+str(r.status_code))
 
             return True
         
         except (ConnectionError, HTTPError) as error:
-            print(f"Prusa Request Error (Connection): {error}")
+            #print(f"Prusa Request Error (Connection): {error}")
 
             self.offline = True
 
@@ -306,14 +306,19 @@ with open("config.json") as f:
     config_options = json.loads(f.read())
     sheet_range = config_options["range"]
     update_interval = float(config_options["update_interval"])
-    add_header = config_options["add_header"]
     range_i = int(re.findall(r'^[^\d]*(\d+)',sheet_range)[0])
     try:
-        reset_adapter_hack = config_options["reset_adapter"]
         ethernet_adapter = config_options["ethernet_adapter"]
     except:
-        reset_adapter_hack = 0
         ethernet_adapter = ""
+    try:
+        reset_adapter_hack = config_options["reset_adapter"]
+    except:
+        reset_adapter_hack = 0
+    try:
+        add_header = config_options["add_header"]
+    except:
+        add_header = 0
 
     for ipr in config_options["ip_range"]:
         ip_range_start.append([int(x) for x in ipr["start"].split('.')])
@@ -337,7 +342,7 @@ if (60/update_interval)*len(Printer_List) > WRITE_QUOTA_PER_MINUTE:
 with concurrent.futures.ThreadPoolExecutor(max_workers=len(Printer_List)) as executor:
     future_list = {executor.submit(p.discover_address): p for p in Printer_List}
 
-if add_header == "true":
+if add_header:
     update_headers()
 
 print("Start Main Loop")
